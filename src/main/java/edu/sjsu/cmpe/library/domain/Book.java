@@ -12,47 +12,56 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.Path;
 
 import org.eclipse.jetty.util.ajax.JSON;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import edu.sjsu.cmpe.library.dto.AuthorDto;
 import edu.sjsu.cmpe.library.dto.BookDto;
 import edu.sjsu.cmpe.library.dto.LinkDto;
 import edu.sjsu.cmpe.library.dto.LinksDto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.collect.Maps;
+
+@JsonPropertyOrder({"isbn","title", "publication-date", "language","num-pages","status" })
 public class Book {
 	private long isbn;
 	private Long reviewKey;
-	private Long authorKey;
+	//private Long authorKey;
 	//private List<Review> reviews;
+	
+	
 	private String title;
+	@NotEmpty
 	@JsonProperty("publication-date")
-	
-	
 	private String publication_date;
-	@JsonProperty(required = false)
+	
 	private String language;
 	
-	@JsonProperty(required = false)
+	
+	@JsonProperty("num-pages")
 	private int num_pages;
+	
 	private enum Status { 
 		available , checkedout , inqueue , lost }
-
+	@NotEmpty
 	private Status status; 
-
-	@JsonProperty("authors")
+	
+	
 	private HashMap<Integer, String> authors = new HashMap<Integer, String>();
 
-	
+
+
 	private final ConcurrentHashMap<Long, Review> reviewInMemoryMap;
-	private final ConcurrentHashMap<Long, Author> authorInMemoryMap;
+	//private final ConcurrentHashMap<Long, Author> authorInMemoryMap;
 	
 	public Book(){
 		reviewKey = Long.valueOf(0);
 		reviewInMemoryMap = new ConcurrentHashMap<Long, Review>();
-		authorKey = Long.valueOf(0);
-		authorInMemoryMap = new ConcurrentHashMap<Long, Author>();
+		//authorKey = Long.valueOf(0);
+		//authorInMemoryMap = new ConcurrentHashMap<Long, Author>();
 	}
-	public Review addReview(Review review){
+	public Review setReview(Review review){
 		
 		Long id = generateReviewKey();
 		review.setId(id);
@@ -67,7 +76,7 @@ public class Book {
 	    }
 	
 	
-	public List<Review> getAllReviews(){
+	public List<Review> getReviews(){
 		int totalReviews = reviewInMemoryMap.size();
 		System.out.println("Number of reviews " + totalReviews);
 		List<Review> reviewsList = new ArrayList<Review>();
@@ -86,13 +95,14 @@ public class Book {
 	return Long.valueOf(++reviewKey);
     }
 	 
-	 private final Long generateAuthorKey(){
+/*	 private final Long generateAuthorKey(){
 		 return Long.valueOf(++authorKey);
 	 }
 	 
 	 public Author addAuthor(Author author){
 			
 			Long id = generateAuthorKey();
+			System.out.println("author id :"+ id);
 			author.setAuthorId(id);
 			authorInMemoryMap.put(id, author);
 			return author;
@@ -103,7 +113,19 @@ public class Book {
 				"ID was %s but expected greater than zero value", id);
 			return authorInMemoryMap.get(id);
 		    }
-	// add more fields here
+	
+	 public List<Author> getAllAuthors(){
+			int totalAuthors = reviewInMemoryMap.size();
+			System.out.println("Number of Authors " + totalAuthors);
+			List<Author> authorsList = new ArrayList<Author>();
+			for(int i = 1; i < totalAuthors+1 ; i++){
+				authorsList.add(getAuthorByID((long) i));
+			}
+			return authorsList;
+			
+			
+		}
+		
 
 	/**
 	 * @return the isbn
@@ -181,8 +203,12 @@ public class Book {
 		this.num_pages = num_pages;
 	}
 
-	public void setStatus(String status){
+	public void setStatus(String status) {
+		
 		this.status = Status.valueOf(status);
+		System.out.println("status value"+Status.valueOf(status));
+			
+		
 	}
 
 
@@ -190,7 +216,19 @@ public class Book {
 		return status.name();
 	}
 
-	public void setAuthors(HashMap<String,String>[] authors_names){
+
+	@Override
+	public String  toString(){
+		
+		StringBuilder str = new StringBuilder();
+		str.append(isbn).append("/n").append(title).append("/n").append(reviewKey).append(reviewInMemoryMap.toString());
+		
+		
+		return str.toString();
+		
+	}
+	
+/*	public void setAuthors(HashMap<String,String>[] authors_names){
 		int count = 1;
 
 		for (HashMap<String,String> map : authors_names){
@@ -216,7 +254,7 @@ public class Book {
 
 			}
 		}
-		//System.out.println("displaying the new hash map");
+		System.out.println("displaying the new hash map");
 
 		System.out.println("new map- author values " + authors);
 		
@@ -226,7 +264,7 @@ public class Book {
 	
 	public LinksDto getAuthors(){
 		//LinkDto authLink = new LinkDto("view-author", "/books/"+getIsbn()+"/authors/", "GET");
-		LinksDto authorsLinks = new LinksDto();
+		AuthorDto authorsLinks = new AuthorDto();
 		for (Entry<Integer, String> entryPair:authors.entrySet()){
 			authorsLinks.addLink(new LinkDto("view-author", "/books/"+getIsbn()+"/authors/"+entryPair.getKey(), "GET"));
 		
@@ -235,17 +273,9 @@ public class Book {
 		
 		
 		
-	}
-	@Override
-	public String  toString(){
-		
-		StringBuilder str = new StringBuilder();
-		str.append(isbn).append("/n").append(title).append("/n").append(reviewKey).append(reviewInMemoryMap.toString());
-		
-		
-		return str.toString();
-		
-	}
+	}*/
+	
+
 	
 	
 }
