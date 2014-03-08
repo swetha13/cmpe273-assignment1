@@ -1,7 +1,21 @@
 package edu.sjsu.cmpe.library.domain;
 
+import java.util.Arrays;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import edu.sjsu.cmpe.library.BadRequestException;
+
+
+
+@JsonPropertyOrder({"id","rating", "comment" })
 public class Review{
-	//private int reviewKey;
+	
+	
+	
+	
 	private int rating;
 	private String comment;
 	private Long id;
@@ -9,10 +23,7 @@ public class Review{
 		//reviewKey =0;
 	}
 	
-	/* private final Long generateReviewKey() {
-			// increment existing isbnKey and return the new value
-			//return Long.valueOf(++reviewKey);
-		    }*/
+
 	public void setId(Long id){
 		this.id = id;
 	}
@@ -25,7 +36,14 @@ public class Review{
 	}
 	
 	public void setRating(int rating){
+		
+		if(rating < 6){
 		this.rating = rating;
+		}
+		else{
+			throw new BadRequestException("Rating must be 1-5, input was " + rating);
+		}
+		
 	}
 	
 	public String getComment(){

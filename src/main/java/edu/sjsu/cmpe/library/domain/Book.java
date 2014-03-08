@@ -15,19 +15,23 @@ import org.eclipse.jetty.util.ajax.JSON;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import edu.sjsu.cmpe.library.dto.AuthorDto;
+import edu.sjsu.cmpe.library.dto.AuthorsDto;
 import edu.sjsu.cmpe.library.dto.BookDto;
 import edu.sjsu.cmpe.library.dto.LinkDto;
 import edu.sjsu.cmpe.library.dto.LinksDto;
+import edu.sjsu.cmpe.library.dto.ReviewDto;
+import edu.sjsu.cmpe.library.dto.ReviewsDto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 @JsonPropertyOrder({"isbn","title", "publication-date", "language","num-pages","status" })
 public class Book {
 	private long isbn;
 	private Long reviewKey;
-	//private Long authorKey;
+	private Long authorKey;
 	//private List<Review> reviews;
 	
 	
@@ -48,18 +52,18 @@ public class Book {
 	private Status status; 
 	
 	
-	private HashMap<Integer, String> authors = new HashMap<Integer, String>();
+	//private HashMap<Integer, String> authors = new HashMap<Integer, String>();
 
 
 
 	private final ConcurrentHashMap<Long, Review> reviewInMemoryMap;
-	//private final ConcurrentHashMap<Long, Author> authorInMemoryMap;
+	private final ConcurrentHashMap<Long, Author> authorInMemoryMap;
 	
 	public Book(){
 		reviewKey = Long.valueOf(0);
 		reviewInMemoryMap = new ConcurrentHashMap<Long, Review>();
-		//authorKey = Long.valueOf(0);
-		//authorInMemoryMap = new ConcurrentHashMap<Long, Author>();
+		authorKey = Long.valueOf(0);
+		authorInMemoryMap = new ConcurrentHashMap<Long, Author>();
 	}
 	public Review setReview(Review review){
 		
@@ -95,17 +99,21 @@ public class Book {
 	return Long.valueOf(++reviewKey);
     }
 	 
-/*	 private final Long generateAuthorKey(){
+	 private final Long generateAuthorKey(){
 		 return Long.valueOf(++authorKey);
 	 }
 	 
-	 public Author addAuthor(Author author){
+	 public List<Author> setAuthors(List<Author> authors){
+		 	for(Author author : authors){
 			
 			Long id = generateAuthorKey();
 			System.out.println("author id :"+ id);
-			author.setAuthorId(id);
+			author.setId(id);
 			authorInMemoryMap.put(id, author);
-			return author;
+			
+		 	}
+		 	
+		 	return authors;
 		}
 	 
 	 public  Author getAuthorByID(Long id) {
@@ -114,19 +122,42 @@ public class Book {
 			return authorInMemoryMap.get(id);
 		    }
 	
-	 public List<Author> getAllAuthors(){
-			int totalAuthors = reviewInMemoryMap.size();
+	 public List<LinkDto> getAuthors(){
+		 
+		 List<LinkDto> linkDto = Lists.newArrayList();
+		 for(Author author : viewAllAuthorsList()){
+			 linkDto.add(new LinkDto("view-author","/books/"+getIsbn()+"/reviews/"+author.getId(),"GET"  ));
+			 
+		 }
+		 
+		 return linkDto;
+		 
+		 
+//		 
+//		 List<Author> allAuthors = getAuthorsList();
+//		 System.out.println("Swetha get authors" + allAuthors);
+//		 AuthorsDto authorResponse = new AuthorsDto(allAuthors);
+//		 /*for(Author author:allAuthors){
+//			 authorResponse.addLink(new LinkDto("view-author","/books/"+getIsbn()+"/reviews/"+author.getAuthorId(),"GET"  ));
+//			 
+//		 }*/
+//			
+//		 return authorResponse;
+//		 
+			
+		
+		}
+		
+	 public List<Author> viewAllAuthorsList(){
+		 int totalAuthors = authorInMemoryMap.size();
 			System.out.println("Number of Authors " + totalAuthors);
 			List<Author> authorsList = new ArrayList<Author>();
 			for(int i = 1; i < totalAuthors+1 ; i++){
 				authorsList.add(getAuthorByID((long) i));
 			}
 			return authorsList;
-			
-			
-		}
-		
-
+		 
+	 }
 	/**
 	 * @return the isbn
 	 */
