@@ -237,7 +237,7 @@ public class BookResource {
 	@Path("/{isbn}/authors/{id}")
 	@Timed(name = "view-author")
 	
-	public AuthorDto viewReviewById(@PathParam("isbn") LongParam isbn , @PathParam("id") Long id){
+	public AuthorDto viewAuthorById(@PathParam("isbn") LongParam isbn , @PathParam("id") Long id){
 		Book book = bookRepository.getBookByISBN(isbn.get());
 		Author author = book.getAuthorByID(id);
 		
